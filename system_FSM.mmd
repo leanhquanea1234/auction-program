@@ -1,0 +1,25 @@
+stateDiagram-v2
+    [*] --> Initialize: Create Server & Observers
+    
+    Initialize --> CreateAuction: createAuction()
+    
+    CreateAuction --> RegisterObservers: Auction OPEN
+    
+    RegisterObservers --> RegisterObservers: attach() observers
+    
+    RegisterObservers --> Bidding: Ready for bids
+    
+    Bidding --> ValidateBid: placeBid()
+    
+    ValidateBid --> NotifyAll: Valid bid - notify all
+    ValidateBid --> NotifySingle: Invalid bid - notify one
+    
+    NotifySingle --> Bidding: Continue
+    
+    NotifyAll --> UpdateObservers: Observers update
+    UpdateObservers --> Bidding: More bids
+    UpdateObservers --> Close: closeAuction()
+    
+    Close --> FinalNotify: Auction CLOSED - notify all
+    
+    FinalNotify --> [*]: Cleanup

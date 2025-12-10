@@ -1,0 +1,108 @@
+---
+config:
+  layout: dagre
+  look: classic
+  theme: redux
+---
+classDiagram
+direction LR
+    class Client {
+	    #int clientIdCounter$ = 0
+	    #int clientId
+	    #string name
+	    +Client()
+	    +Client(clientName:  string)
+	    +~Client()
+	    +receiveNotification(auctionId: int, message: string, currentPrice: long long) void*
+	    +getClientId() int
+	    +getName() string
+	    +placeBid(auctionId: int, bidAmount:  long long) void*
+    }
+
+    class Server {
+	    #int auctionIdCounter$ = 0
+	    +~Server()
+	    +createAuction(productName: string, initPrice: long long) int*
+	    +registerClient(auctionId: int, client: Client*) void*
+	    +unregisterClient(auctionId: int, client: Client*) void*
+	    +processBid(auctionId: int, clientId:  int, bidAmount: long long) bool*
+	    +getCurrentPrice(auctionId: int) long long*
+	    +closeAuction(auctionId:  int) void*
+    }
+
+    class Observer {
+	    +~Observer()
+	    +update(subject: Subject*) void*
+	    +getObserverId() int*
+    }
+
+    class Subject {
+	    +~Subject()
+	    +attach(observer: Observer*) void*
+	    +detach(observer: Observer*) void*
+	    +notify() void*
+    }
+
+    class BidderObserver {
+	    -Server* server
+	    +BidderObserver(name: string, srv: Server*)
+	    +~BidderObserver()
+	    +update(subject: Subject*) void
+	    +getObserverId() int
+	    +receiveNotification(auctionId:  int, message: string, currentPrice: long long) void
+	    +placeBid(auctionId: int, bidAmount: long long) void
+    }
+
+    class AuctionSubject {
+	    -int auctionId
+	    -string itemName
+	    -long long currentPrice
+	    -int highestBidderId
+	    -vector~Observer*~ observers
+	    -string lastMessage
+	    -enum ActionState state
+	    -findObserver(observerId: int) Observer*
+	    +AuctionSubject(id: int, name: string, initPrice:  long long)
+	    +~AuctionSubject()
+	    +attach(observer: Observer*) void
+	    +detach(observer:  Observer*) void
+	    +notify() void
+	    +notifyObserver(observerId: int) void
+	    +updateBid(bidderId: int, bidAmount:  long long) bool
+	    +openAuction() void
+	    +closeAuction() void
+	    +getAuctionId() int
+	    +getItemName() string
+	    +getCurrentPrice() long long
+	    +getHighestBidderId() int
+	    +getLastMessage() string
+	    +getState() AuctionState
+	    +getStateString() string
+    }
+
+    class AuctionServer {
+	    -map~int, AuctionSubject~ auctions
+	    +AuctionServer()
+	    +~AuctionServer()
+	    +createAuction(productName:  string, initPrice: long long) int
+	    +findAuction(auctionId: int) AuctionSubject*
+	    +registerClient(auctionId: int, client:  Client*) void
+	    +unregisterClient(auctionId: int, client: Client*) void
+	    +processBid(auctionId: int, clientId: int, bidAmount: long long) bool
+	    +getCurrentPrice(auctionId: int) long long
+	    +closeAuction(auctionId: int) void
+	    +displayAuctionInfo(auctionId:  int) void
+    }
+
+	<<interface>> Client
+	<<interface>> Server
+	<<interface>> Observer
+	<<interface>> Subject
+
+    Client <|.. BidderObserver 
+    Observer <|.. BidderObserver 
+    Subject <|.. AuctionSubject
+    Server <|.. AuctionServer
+    BidderObserver --> Server : call
+    AuctionServer o-- AuctionSubject : manage
+    AuctionSubject o-- Observer : notify
