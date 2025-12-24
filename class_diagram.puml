@@ -1,0 +1,74 @@
+' compile on https://www.planttext.com/
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classFontSize 17
+skinparam activity2FontSize 18
+left to right direction
+scale 1920x1080
+
+interface Client {
+  {field} -clientId : int
+  {field} -name : string
+  +receiveNotification(...) : void
+  +placeBid(...) : void
+}
+
+interface Server {
+  +createAuction(...) : int
+  +registerClient(...) : void
+  +processBid(...) : bool
+  +closeAuction(...) : void
+}
+
+interface Observer {
+  +update(subject: Subject) : void
+  +getObserverId() : int
+}
+
+interface Subject {
+  +attach(o: Observer) : void
+  +detach(o: Observer) : void
+  +notify() : void
+}
+
+' Concrete classes: core attributes + essential methods
+class BidderObserver {
+  -server : Server
+  +update(subject: Subject) : void
+  +receiveNotification(...) : void
+  +placeBid(...) : void
+}
+
+class AuctionSubject {
+  -auctionId : int
+  -itemName : string
+  -currentPrice : long long
+  -highestBidderId : int
+  -observers : vector<Observer>
+  -state : AuctionState
+  +attach(o: Observer) : void
+  +detach(o: Observer) : void
+  +notify() : void
+  +updateBid(...) : bool
+}
+
+class AuctionServer {
+  -auctions : map<int, AuctionSubject>
+  +createAuction(...) : int
+  +registerClient(...) : void
+  +processBid(...) : bool
+  +closeAuction(...) : void
+}
+
+' Relationships
+Client <|.. BidderObserver
+Observer <|.. BidderObserver
+Subject <|.. AuctionSubject
+Server <|.. AuctionServer
+
+BidderObserver --> Server : calls
+AuctionServer o-- AuctionSubject : manages
+AuctionSubject o-- Observer : notifies
+
+@enduml

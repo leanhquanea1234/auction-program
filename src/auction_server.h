@@ -113,7 +113,6 @@ public:
         notify();
     }
 
-    // getters
     int getAuctionId() const { return auctionId; }
     std::string getItemName() const { return itemName; }
     long long getCurrentPrice() const { return currentPrice; }
@@ -139,8 +138,8 @@ public:
 
 class AuctionServer : public Server {
 private:
+    /// manages auction using auctionID
     std::map<int, AuctionSubject> auctions;
-
 
 public:
     AuctionServer() = default;
